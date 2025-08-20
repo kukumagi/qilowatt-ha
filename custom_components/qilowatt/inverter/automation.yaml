@@ -1,0 +1,49 @@
+alias: "Passive mode: from entities"
+description: Send signed 32-bit values as unsigned Modbus registers
+mode: single
+triggers:
+  - entity_id:
+      - input_button.passive_mode_from_entities
+    trigger: state
+conditions: []
+actions:
+  - data:
+      device: fe2d74568dcc6217acb511eb9ba1fc16
+      address: 4487
+      values: >-
+        {% set gp = states('input_number.set_passive_grid_power') | int(0) %}
+        {% if gp < -30000 %}
+          {% set gp = -30000 %}
+        {% elif gp > 30000 %}
+          {% set gp = 30000 %}
+        {% endif %}
+        
+        {% set mb = states('input_number.set_passive_min_battery_power') | int(0) %}
+        {% if mb < -30000 %}
+          {% set mb = -30000 %}
+        {% elif mb > 30000 %}
+          {% set mb = 30000 %}
+        {% endif %}
+        
+        {% set mx = states('input_number.set_passive_max_battery_power') | int(0) %}
+        {% if mx < -30000 %}
+          {% set mx = -30000 %}
+        {% elif mx > 30000 %}
+          {% set mx = 30000 %}
+        {% endif %}
+      
+        {% set gp_u = gp if gp >= 0 else gp + 4294967296 %}
+        {% set mb_u = mb if mb >= 0 else mb + 4294967296 %}
+        {% set mx_u = mx if mx >= 0 else mx + 4294967296 %}
+      
+        {% set gp_hi = (gp_u // 65536) | int %}
+        {% set gp_lo = (gp_u % 65536) | int %}
+        {% set mb_hi = (mb_u // 65536) | int %}
+        {% set mb_lo = (mb_u % 65536) | int %}
+        {% set mx_hi = (mx_u // 65536) | int %}
+        {% set mx_lo = (mx_u % 65536) | int %}
+      
+        [{{ gp_hi }}, {{ gp_lo }}, {{ mb_hi }}, {{ mb_lo }}, {{ mx_hi }}, {{ mx_lo }}]
+
+
+    action: solarman.write_multiple_registers

@@ -9,7 +9,7 @@ from .base_inverter import BaseInverter
 _LOGGER = logging.getLogger(__name__)
 
 
-class SolarmanInverter(BaseInverter):
+class SolarmanSofarInverter(BaseInverter):
     """Implementation for Sofar integrated inverters."""
 
     def __init__(self, hass: HomeAssistant, config_entry):
@@ -75,7 +75,7 @@ class SolarmanInverter(BaseInverter):
             self.get_state_float("inverter_activepower_pcc_s") * -1,
             self.get_state_float("inverter_activepower_pcc_t") * -1,
         ]
-        today = self.get_state_float("sofar_import_energy_today")
+        today = self.get_state_float("inverter_today_energy_import")
         total = 0.0  # As per payload
         current = [
             self.get_state_float("inverter_current_pcc_r"),

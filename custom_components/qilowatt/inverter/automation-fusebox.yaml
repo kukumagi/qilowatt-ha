@@ -1,0 +1,102 @@
+alias: QiloWatt Fusebox Automation
+description: Automate the passive mode settings based on the current mode and source.
+triggers:
+  - trigger: state
+    entity_id:
+      - sensor.qw_mode
+  - trigger: state
+    entity_id:
+      - sensor.qw_powerlimit
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: state
+            entity_id: sensor.qw_mode
+            state: frrup
+          - condition: state
+            entity_id: sensor.qw_source
+            state: fusebox
+        sequence:
+          - action: number.set_value
+            metadata: {}
+            data:
+              value: "20000"
+            target:
+              entity_id:
+                - inpu_number.set_passive_min_battery_power
+                - inpu_number.set_passive_max_battery_power
+          - action: number.set_value
+            metadata: {}
+            data:
+              value: "0"
+            target:
+              entity_id:
+                - inpu_number.set_passive_grid_power
+          - action: input_button.press
+            metadata: {}
+            target:
+              entity_id:
+                - input_button.passive_mode_from_entities
+
+      - conditions:
+          - condition: state
+            entity_id: sensor.qw_mode
+            state: buy
+          - condition: state
+            entity_id: sensor.qw_source
+            state: fusebox
+        sequence:
+          - action: number.set_value
+            metadata: {}
+            data:
+              value: "-20000"
+            target:
+              entity_id:
+                - inpu_number.set_passive_min_battery_power
+                - inpu_number.set_passive_max_battery_power
+          - action: number.set_value
+            metadata: {}
+            data:
+              value: "0"
+            target:
+              entity_id:
+                - inpu_number.set_passive_grid_power
+          - action: input_button.press
+            metadata: {}
+            target:
+              entity_id:
+                - input_button.passive_mode_from_entities
+
+      - conditions:
+          - condition: state
+            entity_id: sensor.qw_mode
+            state: normal
+        sequence:
+          - action: number.set_value
+            metadata: {}
+            data:
+              value: "-20000"
+            target:
+              entity_id:
+                - inpu_number.set_passive_min_battery_power
+          - action: number.set_value
+            metadata: {}
+            data:
+              value: "20000"
+            target:
+              entity_id:
+                - inpu_number.set_passive_max_battery_power
+          - action: number.set_value
+            metadata: {}
+            data:
+              value: "0"
+            target:
+              entity_id:
+                - inpu_number.set_passive_grid_power
+          - action: input_button.press
+            metadata: {}
+            target:
+              entity_id:
+                - input_button.passive_mode_from_entities
+mode: single
